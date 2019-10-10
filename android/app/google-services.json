@@ -1,0 +1,48 @@
+{
+    "project_info": {
+      "project_number": "699945830767",
+      "firebase_url": "https://mirth-movies.firebaseio.com",
+      "project_id": "mirth-movies",
+      "storage_bucket": "mirth-movies.appspot.com"
+    },
+    "client": [
+      {
+        "client_info": {
+          "mobilesdk_app_id": "1:699945830767:android:ce7452b872b718318b009a",
+          "android_client_info": {
+            "package_name": "com.mi_movies"
+          }
+        },
+        "oauth_client": [
+          {
+            "client_id": "699945830767-roe6f99ds0m68gs0gfdveu3uv4vu31n4.apps.googleusercontent.com",
+            "client_type": 1,
+            "android_info": {
+              "package_name": "com.mi_movies",
+              "certificate_hash": "da4e52fd7a7749e094bb2b3de4224bfa2130c34b"
+            }
+          },
+          {
+            "client_id": "699945830767-4jihlgmpc7tompj0852gbn0rnvvksg75.apps.googleusercontent.com",
+            "client_type": 3
+          }
+        ],
+        "api_key": [
+          {
+            "current_key": "AIzaSyBpy6y9d8Letpf5snl3mjG7YBLA3l86CDE"
+          }
+        ],
+        "services": {
+          "appinvite_service": {
+            "other_platform_oauth_client": [
+              {
+                "client_id": "699945830767-4jihlgmpc7tompj0852gbn0rnvvksg75.apps.googleusercontent.com",
+                "client_type": 3
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "configuration_version": "1"
+  }
