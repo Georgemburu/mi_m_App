@@ -84,7 +84,10 @@ function MainHeader(props){
                 <Icon 
                     name="local-movies"
                     size={50}
-                    color= "#9B9B9B"         
+                    color= "#9B9B9B"   
+                    style={{
+                        opacity: .3
+                    }}      
                 />
             </View>
                  

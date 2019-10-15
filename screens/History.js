@@ -9,6 +9,11 @@ import {
 } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 
+// store
+import { connect } from 'react-redux'
+import { GET_orderHistoryData } from '../store/actions/historyActions';
+
+
 import MainHeader from '../components/dumb/headers/main'
 
 
@@ -18,74 +23,26 @@ class History extends React.Component {
         icon: null,
         color: "#EEE2D0"
     }
-    state = {
-        historyData: 
-            {
-                Today: [
-                    {
-                        title: 'The Lord of the Rings',
-                        price: '50',
-                        date: 'today'
-                    },
-                    {
-                        title: 'The Avengers',
-                        price: '50',
-                        date: 'today'
-                    },
-                ],
-                Yesterday: [
-                    {
-                        title: 'The Beauty and THe Beast',
-                        price: '50',
-                        date: 'today'
-                    },
-                    {
-                        title: 'The Maze Runner',
-                        price: '50',
-                        date: 'today'
-                    },
-                ],
-                "19/01/2019": [
-                    {
-                        title: 'The Beauty and THe Beast',
-                        price: '50',
-                        date: 'today'
-                    },
-                    {
-                        title: 'The Maze Runner',
-                        price: '50',
-                        date: 'today'
-                    },
-                ],
-                "18/01/2019": [
-                    {
-                        title: 'The Beauty and THe Beast',
-                        price: '50',
-                        date: 'today'
-                    },
-                    {
-                        title: 'The Maze Runner',
-                        price: '50',
-                        date: 'today'
-                    },
-                ]
-            }
-        
+    
+
+    componentDidMount(){
+        // fetch for history data;
+        let { dispatch } = this.props;
+        GET_orderHistoryData(dispatch)
     }
 
     handleDeleteHistoryCategory = ()=>{
         Alert.alert('Delete')
     }
-    displayHistoryData = ($h_data)=>{
-        let keys = Object.keys($h_data)
+    displayHistoryData = (DatakeysArr,newCorrectedData)=>{
         return (
             <Fragment>
                 {
-                    keys.map((dt, index)=>{
+                    DatakeysArr.map((dt, index)=>{
                         return(
                             <View key={index} style={styles.historyCategoryView}>
                                 <View style={styles.historyCategoryViewTitleView}>
-                                    <Text style={styles.historyCategoryViewTitleText}>{dt}</Text>
+                                    <Text style={styles.historyCategoryViewTitleText}>{new Date(Number(dt)).toDateString()}</Text>
                                     <TouchableOpacity 
                                         onPress={()=>this.handleDeleteHistoryCategory()}
                                     >
@@ -94,7 +51,7 @@ class History extends React.Component {
                                 </View>
                                 <View style={styles.historyCategoryBodyView}>
                                     <ScrollView style={{flex:1}}>
-                                        {$h_data[dt].map((dtt,index)=>(
+                                        {newCorrectedData[dt].map((dtt,index)=>(
                                                 <View key={index} style={styles.historyDetailsView}>
                                                     <Text style={styles.movieTitleText}>{dtt.title}</Text>
                                                     <Text style={styles.moviePriceText}>{dtt.price}</Text>
@@ -112,8 +69,49 @@ class History extends React.Component {
         
     }
 
+    formatHistoryData = ($data)=>{
+        // orderByDATE
+        let newDataArr = [];
+        /**
+         * obj format
+         * {
+         *  Today: ['data obj'],
+         * 
+         * }
+         * 
+         * Year Month Day Time>
+         */
+        let newDataObj = {};
+        let keys = []
+        $data.forEach((dt)=>{
+            let time = dt.id;
+           
+            let dateTime = String(time)
+            console.log(dateTime,time)
+            if(keys.includes(dateTime)===false){
+                keys.push(dateTime);
+            }
+            if(newDataObj[dateTime]===undefined){
+                newDataObj[dateTime] = []
+            }
+            newDataObj[dateTime] = [...dt.orders]
+            
+        })
+        return {
+            DatakeysArr: keys,
+            newCorrectedData: newDataObj
+        }
+    }
     render(){
-        const {  historyData } = this.state
+        let { historyData, historyError } = this.props;
+        let DatakeysArr = [];
+        let newCorrectedData = {};
+        if(historyData.length>0){
+            let returnedData= this.formatHistoryData(historyData);
+            console.log('RETURNED',returnedData)
+            DatakeysArr = returnedData.DatakeysArr;
+            newCorrectedData = returnedData.newCorrectedData;
+        }
         return (
             <View style={styles.history}>
                 <MainHeader TITLE={this.Title}/>
@@ -122,7 +120,7 @@ class History extends React.Component {
                     <ScrollView
                         showsVerticalScrollIndicator={false}
                     >
-                        {this.displayHistoryData(historyData)}
+                        {this.displayHistoryData(DatakeysArr, newCorrectedData )}
                     </ScrollView>
                 </View>
             </View>
@@ -184,5 +182,19 @@ const styles = StyleSheet.create({
 })
 
 
+function mapStateToProps(state){
+    console.log('HISTORY PAGE mapping state to props',state)
+    let { historyReducer } = state;
+    return {
+        historyData: historyReducer.orderHistoryData,
+        historyError: historyReducer.error
+    }
+}
 
-export default History;
+function mapStateToDispatch(dispatch){
+    return {
+        dispatch: dispatch
+    }
+}
+
+export default connect(mapStateToProps,mapStateToDispatch)(History);

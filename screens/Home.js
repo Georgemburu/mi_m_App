@@ -20,6 +20,8 @@ import { connect } from 'react-redux';
 
 // actions
 import {GET_SharedData, SET_SharedData } from '../store/actions/sharedDataActions';
+import {ACTIVATE_Chat_Listener, SET_ChatMesssages } from '../store/actions/chatActions';
+
 
 // shared files
 import  MOVIE_DATA_FOR_DETAILS_VIEW from '../sharedFiles';
@@ -62,8 +64,58 @@ class Home extends React.Component {
                 icon: require('../assets/images/categoryIcons/horror.png')
             },
             {
+                title: 'Animation',
+                icon: require('../assets/images/categoryIcons/cartoon.png')
+            },
+            {
+                title: 'Scify',
+                icon: require('../assets/images/categoryIcons/sciFy.png')
+            },
+            {
+                title: 'All',
+                icon: require('../assets/images/categoryIcons/all.png')
+            }
+        ],
+        SeriesCategoriesArr:[
+            {
+                title: 'Action',
+                icon: require('../assets/images/categoryIcons/gun.png')
+            },
+            {
+                title: 'Comedy',
+                icon: require('../assets/images/categoryIcons/comedy.png')
+            },
+            {
+                title: 'Drama',
+                icon: require('../assets/images/categoryIcons/drama.png')
+            },
+            {
+                title: 'Thriller',
+                icon: require('../assets/images/categoryIcons/thriller.png')
+            },
+            {
+                title: 'Horror',
+                icon: require('../assets/images/categoryIcons/horror.png')
+            },
+            {
                 title: 'Cartoon',
                 icon: require('../assets/images/categoryIcons/cartoon.png')
+            },
+            {
+                title: 'Documentary',
+                icon: require('../assets/images/categoryIcons/documentary.png')
+            },
+            {
+                title: 'Reality_Shows',
+                icon: require('../assets/images/categoryIcons/reality_shows.png')
+            },
+            {
+                title: 'SciFy',
+                icon: require('../assets/images/categoryIcons/sciFy.png')
+            },
+            {
+                title: 'All',
+                icon: require('../assets/images/categoryIcons/all.png')
             }
         ],
     }
@@ -72,7 +124,13 @@ class Home extends React.Component {
         // fetch homeImageSliders
       
 
-        // fetch newMovies    
+        // fetch newMovies  
+        // activate chat listener for schats
+        let { dispatch } = this.props;
+        this._unsubscribeChatListener = ACTIVATE_Chat_Listener(dispatch,($chatMsgArr)=>{
+            // dispatch chatmessages 
+            SET_ChatMesssages(dispatch,$chatMsgArr)
+        })  
     }
 
     renderHomeSliderImages = ($imageArr)=>{
@@ -141,7 +199,7 @@ class Home extends React.Component {
                     return(
                         <Fragment key={index} >
                             <TouchableOpacity 
-                                onPress={(e)=>this.navigateToMovieCategoriesListing(category.title)}
+                                onPress={(e)=>this.navigateToMovieCategoriesListing(category.title+' Movies')}
                                 key={index} 
                                 style={[styles.movieCategoryItem,styles[(index%2==0?'evenColor':'oddColor')]]}
                                 >
@@ -162,7 +220,7 @@ class Home extends React.Component {
                                         justifyContent: 'center',
                                         alignItems: 'center'
                                     }}>
-                                        <Text style={styles.categoryTitleText}>{category.title}</Text>
+                                        <Text style={styles.categoryTitleText}>{category.title.toLowerCase().includes('all')===true?category.title+' Movies':category.title}</Text>
                                     </View>
                             </TouchableOpacity>
                         </Fragment>
@@ -171,8 +229,51 @@ class Home extends React.Component {
             </Fragment>
         )
     }
+
+    renderSeriesCategories = ($categoryArr)=>{
+        let counter;
+        return (
+            <Fragment>
+                {$categoryArr.map((category,index)=>{
+                    return(
+                        <Fragment key={index} >
+                            <TouchableOpacity 
+                                onPress={(e)=>this.navigateToMovieCategoriesListing(category.title+' Series')}
+                                key={index} 
+                                style={[styles.movieCategoryItem,styles[(index%2==0?'seriesEvenColor':'seriesOddColor')]]}
+                                >
+                                    <View key={index} style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}>
+                                        <Image 
+                                            source={category.icon}
+                                            // size={50.4}
+                                            // color="#918686"
+                                            style={styles.categoryIcon}
+                                        />
+                                    </View>
+                                    <View style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}>
+                                        <Text style={styles.categoryTitleText}>{category.title.toLowerCase().includes('all')===true?category.title+' Series':category.title}</Text>
+                                    </View>
+                            </TouchableOpacity>
+                        </Fragment>
+                    )
+                })}
+            </Fragment>
+        )
+    }
+
+    componentWillUnmount(){
+        this._unsubscribeChatListener()
+    }
     render(){
-        let { MovieCategoriesArr } = this.state;
+        let { MovieCategoriesArr, SeriesCategoriesArr } = this.state;
         let { homeSliderImages, newMovies } = this.props;
 
         return(
@@ -231,6 +332,28 @@ class Home extends React.Component {
                             </View>
 
                         </View>
+
+                        {/* added for series */}
+                        <View>
+                            <View style={{
+                                    display: 'flex',
+                                    // flexDirection: 'row',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    width: WIDTH,
+                                    marginVertical: 5
+                                
+                                }}>
+                                    <Text style={styles.titles}>Series Categories</Text>
+
+                            </View>
+                            <View style={styles.movieCategoriesView}>
+                                {this.renderSeriesCategories(SeriesCategoriesArr)}
+                            </View>
+
+                        </View>
+
+                        {/* end for series */}
                     </ScrollView>
                 </View>
             </SafeAreaView>
@@ -303,6 +426,12 @@ const styles = StyleSheet.create({
     categoryIcon: {
         marginTop: 10,
         marginBottom: 10
+    },
+    seriesEvenColor: {
+        backgroundColor: 'rgba(89, 112, 108,.5)'
+    },
+    seriesOddColor: {
+        backgroundColor: 'rgba(89, 112, 108,.5)'
     }
     
 })
@@ -314,7 +443,8 @@ function mapStateToProps(state){
     return {
         homeSliderImages: homeReducer.homeSliderImages,
         newMovies: homeReducer.newMovies,
-        movieData: state.sharedDataReducer.movieData
+        movieData: state.sharedDataReducer.movieData,
+        chatMessages: state.chatReducer.messages
     }
 }
 

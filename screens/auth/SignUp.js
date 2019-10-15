@@ -162,16 +162,21 @@ class SignUp extends React.Component {
             this._errorMesgComponent.setNativeProps({text: '* Password must be of atleast 6 characters'});
             
         }else {
+            // show loading
+            this._signupButtonTextRef.setNativeProps('Loading...')
             // all clear submit to server
             let payload = {
                 Fullname: Fullname.value,
                 Email: Email.value,
                 Password: Password.value
             }
+
             CREATE_newUserAccount(this.props.dispatch,payload).then((user)=>{
                 console.log('returned',user)
+                this._signupButtonTextRef.setNativeProps({text:'Sign Up'})
             }).catch((error)=>{
                 console.log('errror',error)
+                this._signupButtonTextRef.setNativeProps({text:'Sign Up'})
                 this._errorMesgComponent.setNativeProps({text: 'Error creating account. Please try again'});
             })
             
@@ -184,6 +189,11 @@ class SignUp extends React.Component {
     render(){
         let fields = this.state
         let { error } = this.props;
+        if(error.message){
+            if(this._signupButtonTextRef){
+                this._signupButtonTextRef.setNativeProps('Sign Up')
+            }
+        }
         return(
             <SafeAreaView style={{flex:1,backgroundColor: "#121212"}}>
                 <AuthHeader />
@@ -218,7 +228,13 @@ class SignUp extends React.Component {
                             style={styles.signUpBtn}
                             onPress = {()=> this.handleSignUp()}
                         >
-                            <Text style={styles.signUpBtnTxt}>Sign Up</Text>
+                            {/* <Text style={styles.signUpBtnTxt}>Sign Up</Text> */}
+                            <TextInput 
+                                editable={false}
+                                style={styles.signUpBtnTxt}
+                                defaultValue = {'Sign Up'}
+                                ref = {component => this._signupButtonTextRef = component}
+                            />
                         </TouchableOpacity>
 
                         <TouchableOpacity 

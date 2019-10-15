@@ -9,7 +9,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons'
 
 function ContactUs(props){
-
+    let { CLOSE_CONTACTUS_MODAL_FUNCTION_AND_NAVIGATE_TO_MESSAGE_US } = props;
     return(
         <View style={styles.contactUs}>
             <TouchableOpacity >
@@ -48,7 +48,12 @@ function ContactUs(props){
                 </View>
             </TouchableOpacity>
 
-            <TouchableOpacity >
+            <TouchableOpacity 
+                onPress={()=> {
+                    // console.log('clicked 1',CLOSE_CONTACTUS_MODAL_FUNCTION_AND_NAVIGATE_TO_MESSAGE_US)
+                   return CLOSE_CONTACTUS_MODAL_FUNCTION_AND_NAVIGATE_TO_MESSAGE_US()
+                }}
+            >
                 <View style={[styles.btn, styles.messageBtn]}>
                     <Icon 
                         name='forum'

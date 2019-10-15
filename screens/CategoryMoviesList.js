@@ -20,6 +20,7 @@ import { connect } from 'react-redux';
 
 import MainHeader from '../components/dumb/headers/main'
 import MovieDetails from './MovieDetails'
+import seriesReducer from '../store/reducers/seriesReducer';
 
 const WIDTH = Dimensions.get('window').width
 class CategoryMoviesList extends React.Component {
@@ -55,20 +56,46 @@ class CategoryMoviesList extends React.Component {
     setModalVisible(visible) {
         // Alert.alert(visible)
         this.setState({...this.state,modalVisible: visible});
-      }
-
+    }
+    navigateToCart = ()=>{
+        // close modal then navigate
+        this.setState({
+            ...this.state,
+            modalVisible: false
+        })
+        this.props.navigation.navigate('CartPage')
+    }
     render(){
-        let { movies } = this.props;
+        let { movies, series } = this.props;
         let { Title } = this.state;
         console.log('FROM CATEGORY MOVIES LIST (navigation)',this.props.navigation)
         let categoryTitle = this.props.navigation.getParam('categoryTitle',null);
+        let splitedCategoryTiTle = categoryTitle?categoryTitle.split(' '):[];
+        let movieCategory = splitedCategoryTiTle[0];
+        let movieType = splitedCategoryTiTle[1];
+        // if(splitedCategoryTiTle){
+            // title=splitedCategoryTiTle[0];
+            // category = splitedCategoryTiTle[1];
+        // }
         let sortedOutMoviesArr = [];
-        this.state.Title.title = categoryTitle+' Movies';
-        movies.forEach((mov)=>{
-            if(mov.category&&mov.category.toLowerCase()===categoryTitle.toLowerCase()){
-                sortedOutMoviesArr.push(mov)
-            }
-        })
+        this.state.Title.title = `${categoryTitle}`;
+        if(movieType.toLowerCase()=='movies'){
+            movies.forEach((mov)=>{
+                console.log('looping through MOVIES',mov)
+                if(mov.category&&mov.category.toLowerCase()===movieCategory.toLowerCase()){
+                    sortedOutMoviesArr.push(mov)
+                }
+            })
+        }else {
+            series.forEach((mov)=>{
+                console.log('looping through SERIES',mov)
+
+                if(mov.category&&mov.category.toLowerCase()===movieCategory.toLowerCase()){
+                    sortedOutMoviesArr.push(mov)
+                }
+            })
+        }
+        
 
         return (
             <SafeAreaView style={{flex:1, backgroundColor:'#121212'}}>
@@ -79,7 +106,7 @@ class CategoryMoviesList extends React.Component {
                     onRequestClose={() => {
                         this.setModalVisible(false);
                     }}>
-                        <MovieDetails  MOVIE_DATA={this._ClikedMovie_Data}/>
+                        <MovieDetails  MOVIE_DATA={this._ClikedMovie_Data} NAVIGATE_TO_CART_FUNCTION={this.navigateToCart}/>
                     </Modal>
                 <MainHeader TITLE={Title}/>
                 <ScrollView>
@@ -160,9 +187,10 @@ const styles = StyleSheet.create({
 
 function mapStateToProps(state){
     console.log('from CATEGORY MOVIES LIST map state to Props',state)
-    let { moviesReducer } = state;
+    let { moviesReducer, seriesReducer } = state;
     return {
-        movies: moviesReducer.movies
+        movies: moviesReducer.movies,
+        series: seriesReducer.series
     }
 }
 function mapDispatchToProps(dispatch){

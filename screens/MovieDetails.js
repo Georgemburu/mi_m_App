@@ -8,11 +8,21 @@ import {
     TouchableOpacity,
     ScrollView,
     Image,
-    Dimensions
+    Dimensions,
+    Alert,
+    TextInput
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 
+// storage
+import asyncStorage from '@react-native-community/async-storage';
 
+// key
+import { CART_DATA_STORAGE_KEY } from '../constants/strings';
+
+// store
+import { connect } from 'react-redux';
+import { ADD_ToCart } from '../store/actions/cartActions';
 
 // shared file
 import MOVIE_DATA_FOR_DETAILS_VIEW  from '../sharedFiles';
@@ -54,8 +64,19 @@ class MovieDetails extends React.Component {
     }
     
     
-    
-    displayHeader = ($SET_MODAL_VISIBLE_FUNCTION)=>{
+    navigateToCart = ()=>{
+        console.log('NAVIGATING PROPS =>',this.props)
+        if(this.props.navigation!==undefined){
+            console.log('Not as MODAL')
+            this.props.navigation.navigate('CartPage')
+        }else {
+            // its a modal
+            // use passed prop to navigate
+            console.log('As Modal')
+            this.props.NAVIGATE_TO_CART_FUNCTION()
+        }
+    }
+    displayHeader = ($cartItems)=>{
         return(
             <View style={{
                 height: 50,
@@ -79,12 +100,30 @@ class MovieDetails extends React.Component {
                     }}>{this.Title.title}</Text>
                 </View>
                 <View>
-                    <TouchableOpacity>
-                         <Icon 
-                            name="add-shopping-cart"
-                            color="#52AC59"
-                            size ={30}
-                        />
+                    <TouchableOpacity 
+                        onPress = {()=>this.navigateToCart()}
+                        style={{
+                            display: 'flex',
+                            flexDirection:'row'
+                        }}
+                    >
+                       
+                        <Text style={{
+                            color: '#52AC59',
+                            fontSize:20
+                        }}>Go To Cart</Text>
+                        <View style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: 'black',
+                            minWidth: 20,
+                            minHeight: 20,
+                            borderRadius: 100,
+                            marginLeft: 3
+                        }}>
+                            <Text style={{color: 'white',fontFamily:'RobotoSlab-Bold'}}>{$cartItems.length}</Text>
+                        </View>
                     </TouchableOpacity>
                    
                 </View>
@@ -121,12 +160,61 @@ class MovieDetails extends React.Component {
             </Fragment>
         )
     }
+
+
+    handleAddMovieToCart = ($movieDataObj)=>{
+        console.log('Adding movie to cart .....')
+        let { dispatch } = this.props;
+        console.log(dispatch)
+        ADD_ToCart(dispatch,$movieDataObj)
+        if(this._addToCartButtonRef!==undefined||this._addToCartButtonRef!==null){
+            try{
+                this._addToCartButtonRef.setNativeProps({style:{backgroundColor: 'purple'}});
+            }catch(error){
+
+            }
+        }
+        if(this._addToCartButtonTextRef!==undefined||this._addToCartButtonRef!==null){
+            try{
+                this._addToCartButtonTextRef.setNativeProps({text:'Added To Cart'})                
+            }catch(error){
+
+            }
+        }
+
+        setTimeout(()=>{
+            if(this._addToCartButtonTextRef!==undefined||this._addToCartButtonRef!==null){
+                try{
+                    this._addToCartButtonTextRef.setNativeProps({text:'Add to Cart'})
+                              
+                }catch(error){
+    
+                }
+            }
+            if(this._addToCartButtonRef!==undefined||this._addToCartButtonRef!==null){
+                try{
+                this._addToCartButtonRef.setNativeProps({style:{backgroundColor: '#52AC59'}});                                
+                }catch(error){
+    
+                }
+            }
+        },500)
+    }
+
+    componentWillUnmount(){
+        if(this._addToCartButtonTextRef!==undefined||this._addToCartButtonRef!==null){
+            this._addToCartButtonTextRef.setNativeProps({text:'Add to Cart'})
+        }
+        if(this._addToCartButtonRef!==undefined||this._addToCartButtonRef!==null){
+            this._addToCartButtonRef.setNativeProps({style:{backgroundColor: '#52AC59'}});
+        }
+    }
     render(){
         console.log(' ENTER FROM MOVIE DETAILS RENDER METHOD',this.props);
         console.log('SHARED FILE DATA is',MOVIE_DATA_FOR_DETAILS_VIEW.getMovieData())
         console.log('......Entering MOVIE DATA checks');
     
-        let {  SET_MODAL_VISIBLE_FUNCTION } = this.props;
+        let {  SET_MODAL_VISIBLE_FUNCTION, cartItems, NAVIGATE_TO_CART_FUNCTION} = this.props;
         let MOVIE_DATA = null;
         console.log('0. MOVIE DATA =',MOVIE_DATA);
         console.log('1. from props');
@@ -151,19 +239,15 @@ class MovieDetails extends React.Component {
             this.Title.title = MOVIE_DATA.title;
             console.log('FROM MOVIE DETAILS',MOVIE_DATA);
         }
-        // let { movieDetails } = this.state;
         let {galaryImages, imageUrl, trailerUrl, description } = MOVIE_DATA;
-        // let galaryImages = null;
-        // if(!galaryImages){
-        //     galaryImages = []
-        // }
+      
         let { clickedPlay } = this.state;
         console.log('HERRRR',this.props)
         console.log('EXIT MOVIE DETAILS RENDER METHOD')
         return (
             <SafeAreaView style={{flex:1, backgroundColor:'#121212'}}>
                 {/* <MainHeader TITLE={this.Title}/> */}
-                {this.displayHeader(SET_MODAL_VISIBLE_FUNCTION)}
+                {this.displayHeader(cartItems)}
                 <ScrollView>
                     <View style={styles.movieDetails}>
                     <View style={styles.trailerView}>
@@ -266,20 +350,31 @@ class MovieDetails extends React.Component {
                         justifyContent: 'center',
                         alignItems: 'center'
                     }}>
-                        <TouchableOpacity style={{
-                            backgroundColor: '#52AC59',
-                            width: 173,
-                            height: 40,
-                            borderRadius: 20,
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                        }}>
-                            <Text style={{
-                                color: '#FFFFFF',
-                                fontFamily: 'RobotoSlab',
-                                fontSize: 20
-                            }}>Add to Cart </Text>
+                        <TouchableOpacity 
+                            onPress = {()=>this.handleAddMovieToCart(MOVIE_DATA)}
+                            style={{
+                                backgroundColor: '#52AC59',
+                                width: 173,
+                                height: 40,
+                                borderRadius: 20,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                            }}
+                            ref = {component => this._addToCartButtonRef = component}
+
+                        >
+                            <TextInput 
+                                editable ={ false}
+                                ref = {component => this._addToCartButtonTextRef = component}
+                                style={{
+                                    color: '#FFFFFF',
+                                    fontFamily: 'RobotoSlab',
+                                    fontSize: 20
+                                }}
+                                value = {'Add to Cart'}
+                            />
+                            
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -340,5 +435,17 @@ const styles = StyleSheet.create({
     }
 })
 
+function mapStateToProps(state){
+    let { cartReducer } = state;
+    return {
+        cartItems: cartReducer.cartItems,
+        cartErrors: cartReducer.error
+    }
+}
 
-export default MovieDetails;
+function mapDispatchToProps(dispatch){
+    return {
+        dispatch: dispatch
+    }
+}
+export default connect(mapStateToProps,mapDispatchToProps)(MovieDetails);

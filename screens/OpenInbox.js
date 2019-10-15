@@ -14,6 +14,10 @@ import {
 
 import Icon from 'react-native-vector-icons/MaterialIcons'
 
+// store
+import { connect } from 'react-redux';
+import { ACTIVATE_Chat_Listener, SEND_Message  } from '../store/actions/chatActions';
+
 import You from '../components/dumb/chat/You';
 import Me from '../components/dumb/chat/Me';
 
@@ -24,53 +28,58 @@ const HEIGHT = Dimensions.get('window').height;
 
 class OpenInbox extends React.Component {
     state = {
+        textMessage: '',
         messages: [
-            {
-                from: 'admin',
-                text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitationullamco laboris',
-                time: '19/01/2019',
-                status: 'read'
-            },
-            {
-                to: 'admin',
-                text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitationullamco laboris',
-                time: '19/01/2019',
-                status: 'read'
-            },
-            {
-                from: 'admin',
-                text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitationullamco laboris',
-                time: '19/01/2019',
-                status: 'read'
-            },
-            {
-                to: 'admin',
-                text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitationullamco laboris',
-                time: '19/01/2019',
-                status: 'read'
-            },
-            {
-                to: 'admin',
-                text: 'elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. oris',
-                time: '19/01/2019',
-                status: 'read'
-            },
-            {
-                to: 'admin',
-                text: 'elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. oris',
-                time: '19/01/2019',
-                status: 'read'
-            },
-            {
-                from: 'admin',
-                text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitationullamco laboris',
-                time: '19/01/2019',
-                status: 'read'
-            },
+            // {
+            //     from: 'admin',
+            //     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitationullamco laboris',
+            //     time: '19/01/2019',
+            //     status: 'read'
+            // },
+            // {
+            //     to: 'admin',
+            //     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitationullamco laboris',
+            //     time: '19/01/2019',
+            //     status: 'read'
+            // },
+            // {
+            //     from: 'admin',
+            //     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitationullamco laboris',
+            //     time: '19/01/2019',
+            //     status: 'read'
+            // },
+            // {
+            //     to: 'admin',
+            //     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitationullamco laboris',
+            //     time: '19/01/2019',
+            //     status: 'read'
+            // },
+            // {
+            //     to: 'admin',
+            //     text: 'elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. oris',
+            //     time: '19/01/2019',
+            //     status: 'read'
+            // },
+            // {
+            //     to: 'admin',
+            //     text: 'elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. oris',
+            //     time: '19/01/2019',
+            //     status: 'read'
+            // },
+            // {
+            //     from: 'admin',
+            //     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magnaaliqua. Ut enim ad minim veniam, quis nostrud exercitationullamco laboris',
+            //     time: '19/01/2019',
+            //     status: 'read'
+            // },
             
         ]
     }
 
+    componentDidMount(){
+        let { dispatch } = this.props;
+        // this._unsubscribe = ACTIVATE_Chat_Listener(dispatch)
+    }
     handleDisplayHeader =()=>{
         return(
             <View style={{
@@ -121,8 +130,13 @@ class OpenInbox extends React.Component {
     displayMessages = ($messagesArr)=>{
         return(
             <Fragment>
-                {$messagesArr.map((msg, index)=>(
-                    (msg.from?(
+                {$messagesArr.length<1?(
+                    <Text style={{
+                        color: 'white',
+                        marginLeft: 5
+                    }}>No chats available. Chats appear here</Text>
+                ):($messagesArr.map((msg, index)=>(
+                    (msg.receiver!=='Admin'?(
                             <View key={index}>
                                 <You MESSAGE_DATA={msg}/>
                             </View>
@@ -131,17 +145,39 @@ class OpenInbox extends React.Component {
                                 <Me MESSAGE_DATA={msg}/>
                             </View>
                         ))
-                ))}
+                )))}
             </Fragment>
         )
     }
+
+    handleTypingMessage = ($text)=>{
+        this.setState({
+            ...this.state,
+            textMessage: $text
+        })
+    }
+    handleSendMessage = ()=>{
+        console.log('send message',this.state.textMessage);
+        // send to server
+        let { dispatch } = this.props;
+        let { textMessage } = this.state;
+        this._textInputForMsg.setNativeProps({text:''})
+        SEND_Message(dispatch,textMessage)
+        
+    }
+
+    componentWillUnmount(){
+        // unsubscribe from live chat listener
+        // this._unsubscribe()
+    }
+
     render(){
-        let { messages } = this.state;
+        let { messages } = this.props;
 
         return (
             <SafeAreaView style={{flex:1,backgroundColor:'#121212'}}>
                 {this.handleDisplayHeader()}
-                <KeyboardAvoidingView  enabled style={{flex:1}}>
+                <KeyboardAvoidingView  enabled style={{flex:1}} >
                     <ScrollView>
                 <View style={styles.openInbox}>
 
@@ -157,16 +193,22 @@ class OpenInbox extends React.Component {
                             placeholderTextColor='#999794'
                             style={styles.editorTxtInput}
                             selectionColor='green'
+                            defaultValue = {this.state.textMessage}
+                            onChangeText = {(text)=>this.handleTypingMessage(text)}
+                            ref={component => this._textInputForMsg = component}
                         />
-                        <TouchableOpacity style={{
-                            backgroundColor: '#BD4D4D',
-                            width: 50,
-                            height: 48,
-                            borderRadius: 4,
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                        }}>
+                        <TouchableOpacity 
+                            onPress = {()=>this.handleSendMessage()}
+                            style={{
+                                backgroundColor: '#BD4D4D',
+                                width: 50,
+                                height: 48,
+                                borderRadius: 4,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                            }}
+                        >
                             <Image 
                                 source={require('../assets/images/send/1.png')}
                             />
@@ -208,4 +250,19 @@ const styles = StyleSheet.create({
     }
 })
 
-export default OpenInbox;
+function mapStateToProps(state){
+    console.log('OPEN INBOX mapping state to props',state)
+    let { chatReducer } = state;
+    return {
+        messages: chatReducer.messages,
+        chatError: chatReducer.error
+    }
+}
+
+function mapDispatchToProps(dispatch){
+    return {
+        dispatch: dispatch
+    }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(OpenInbox);

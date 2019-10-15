@@ -18,16 +18,20 @@ const appStore = createStore(combinedReducers,compose(applyMiddleware(thunk,logg
 import StartUpScreen from './screens/StartUp'
 import RootNavigator,{ SIGNED_IN_USER_NAVIGATOR } from './navigator'
 
-class App extends React.Component {
 
-  componentDidMount(){
-    SplashScreen.hide();
-  }
+
+
+
+class App extends React.Component {
 
   state = {
     isLoading: true,
     userLoggedIn: false,
   }
+  componentDidMount(){
+    SplashScreen.hide();
+  }
+
 
   setIsloadingState = ($state,$userIsLoggedIn)=>{
     console.log('called setIsLoading function')
@@ -38,14 +42,18 @@ class App extends React.Component {
     })
   }
 
+  
+
   renderMainAppComponent=()=>{ 
       return (
         <Provider store={appStore}>
-          {this.state.userLoggedIn===true?(
-              <SIGNED_IN_USER_NAVIGATOR />
-          ):(
-            <RootNavigator />
-          )}
+           
+                  {this.state.userLoggedIn===true?(
+                  <SIGNED_IN_USER_NAVIGATOR />
+                  ):(
+                    <RootNavigator />
+                  )}
+                
         </Provider>
       )
   }
@@ -59,18 +67,23 @@ class App extends React.Component {
     )
   }
 
+ 
   render(){
     return (
       <Fragment>
+
         {this.state.isLoading==true?(
           this.renderStartupScreen()
           ):(
             this.renderMainAppComponent()
           )}
+
       </Fragment>
       )
     }
 }
+
+
 
 
 

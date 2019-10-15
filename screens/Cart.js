@@ -6,8 +6,18 @@ import {
     Image,
     TouchableOpacity,
     Dimensions,
-    ScrollView
+    ScrollView,
+    Alert
 } from 'react-native'
+
+// async storage
+import asyncStorage from '@react-native-community/async-storage';
+// key
+import { CART_DATA_STORAGE_KEY } from '../constants/strings';
+
+//store
+import { connect } from 'react-redux';
+import { GET_AllCartData, REMOVE_AParticularMovieFromCart, SEND_order }  from '../store/actions/cartActions';
 
 import MainHeader from '../components/dumb/headers/main'
 import Icon from 'react-native-vector-icons'
@@ -20,27 +30,28 @@ class Cart extends React.Component {
         title: 'Cart',
         icon: 'shopping-cart'
     }
-    state = {
-        cartContents: [
-            {
-                title: 'Lord of The Rings',
-                price: '50',
-                id: 1
-            },
-            {
-                title: 'Lord of The Rings',
-                price: '50',
-                id: 2
-            },
-            {
-                title: 'Lord of The Rings',
-                price: '50',
-                id: 3
+
+
+    handleDelete = ($item)=>{
+        let { dispatch } = this.props;
+        let itemId = $item.id || $item.uid;
+        let newCartItemsClone = [];
+        let deleted = false;
+        this.props.cartItems.forEach(($itm)=>{
+            if($itm.id===itemId || $itm.uid===itemId && deleted===false){
+                // do nothing
+                // make sure only one is deleted if many of the same time are present
+                deleted = true;
+            }else {
+                newCartItemsClone.push($itm)
             }
-        ]
+        })
+       
+        REMOVE_AParticularMovieFromCart(dispatch,$item,newCartItemsClone)
     }
 
     displayCartContents = ($cartContents)=>{
+        console.log('LENGTH OF CART=',$cartContents,$cartContents.length)
 
         return (
             <Fragment>
@@ -53,9 +64,9 @@ class Cart extends React.Component {
                     }}>No Items In Cart</Text>
                 ):(
                     <Fragment>
-                        {$cartContents.map((item)=>{
+                        {$cartContents.map((item,index)=>{
                             return(
-                                <View key={item.id}
+                                <View key={item.id+'_'+index}
                                     style={{
                                         display: 'flex',
                                         flexDirection: 'row',
@@ -67,7 +78,9 @@ class Cart extends React.Component {
                                     >
                                     <Text style={styles.itemsText}>{ item.title }</Text>
                                     <Text style={styles.itemsPrice}>{ item.price}</Text>
-                                    <TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={(item)=>this.handleDelete(item)}
+                                    >
                                         <Image 
                                             source={require('../assets/images/other/delete.png')}
                                         />
@@ -81,8 +94,44 @@ class Cart extends React.Component {
             </Fragment>
         )
     }
+
+    displayTotal = ($items)=>{
+        let total = 0;
+        $items.map((mov)=>{
+            if(mov.price){
+                total += Number(mov.price)
+            }
+        })
+        console.log('CART TOTAL==',total)
+        return (
+            <Text style={{
+                color:'#FFF8EE',
+                fontSize: 25,
+                fontFamily: 'RobotoSlab',
+                marginRight: 70
+            }}>{total}</Text>
+        )
+    }
+
+    handleSendOrderBtnClick = ()=>{
+        console.log('send order BTN clicked');
+        let orders = this.props.cartItems;
+        let { dispatch } = this.props;
+        // send to db;
+        if(orders.length<1){
+            return
+        }
+        SEND_order(dispatch,orders)
+
+    }
     render(){
-        let { cartContents } = this.state;
+        // let { cartContents } = this.state;
+        let cartContents = this.props.cartItems;
+        console.log('CART CONTENTS=',cartContents)
+        let { cartItems, cartErrors } = this.props;
+        if(cartErrors.type!==null && cartErrors.message!==null){
+            Alert.alert(cartErrors.type,cartErrors.message)
+        }
         return (
             <View style={styles.cart}>
                 <MainHeader TITLE={this.Title} />
@@ -129,32 +178,35 @@ class Cart extends React.Component {
                                 fontSize: 24,
                                 fontFamily: 'RobotoSlab'
                             }}>Total</Text>
-                            <Text style={{
-                                color:'#FFF8EE',
-                                fontSize: 25,
-                                fontFamily: 'RobotoSlab',
-                                marginRight: 70
-                            }}>100</Text>
+
+                            {this.displayTotal(cartContents)}
+                            
                         </View>
                     </View>
                 </View>
 
                 <View style={styles.sendOrderButtonView}>
-                    <TouchableOpacity style={{
-                        width: 159,
-                        height: 52,
-                        backgroundColor: '#605858',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        borderRadius: 4
-                    }}>
-                        <Text style={{
-                            color: '#FFFFFF',
-                            fontFamily: 'RobotoSlab',
-                            fontSize: 18
-                        }}>Send My Order</Text>
-                    </TouchableOpacity>
+                    {cartContents.length>0?(
+                        <TouchableOpacity 
+                        onPress = {()=>this.handleSendOrderBtnClick()}
+                        style={{
+                            width: 159,
+                            height: 52,
+                            backgroundColor: '#605858',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderRadius: 4
+                        }}
+                        >
+                            <Text style={{
+                                color: '#FFFFFF',
+                                fontFamily: 'RobotoSlab',
+                                fontSize: 18
+                            }}>Send My Order</Text>
+                        </TouchableOpacity>
+                    ):null}
+                    
                 </View>
             </View>
         )
@@ -212,4 +264,22 @@ const styles = StyleSheet.create({
     }
 })
 
-export default Cart;
+function mapStateToProps(state){
+    console.log('CART.JS STATE to props',state)
+    let { cartReducer } = state;
+    return {
+        cartItems: cartReducer.cartItems!==undefined?cartReducer.cartItems:cartReducer,
+        cartErrors: cartReducer.error!==undefined?cartReducer.error:({
+            type: null,
+            message: null
+        })
+    }
+}
+
+function mapDispatchToProps(dispatch){
+    return {
+        dispatch: dispatch
+    }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(Cart);

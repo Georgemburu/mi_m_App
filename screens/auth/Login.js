@@ -68,7 +68,7 @@ class Login extends React.Component {
                 }
                     HANDLE_userLoggedIn(this.props.dispatch,$pyd1)
                     
-
+                this.props.navigation.navigate('HomePage')
                 }else {
                     console.log('User LOGED OUT')
 
@@ -90,7 +90,9 @@ class Login extends React.Component {
 
     componentWillUnmount(){
         // unsubscribe firebase listener
-        this._unsubsribe()
+        if(this._unsubsribe){
+            this._unsubsribe()
+        }
 
     }
 
@@ -117,6 +119,9 @@ class Login extends React.Component {
             // fields clear
             this._errorElem.setNativeProps({text: ''})
 
+            // show loading
+            this._loginBtnTextRef.setNativeProps({text:'Loading...'})
+
             let { dispatch } = this.props;
             let $payload = {
                 Email: this.state.Email.value,
@@ -139,7 +144,11 @@ class Login extends React.Component {
     render(){
         let fields = this.state
         let {error} = this.props;
-       
+    //    if(error.message){
+            if(this._loginBtnTextRef){
+                this._loginBtnTextRef.setNativeProps({text:'Login'})
+            }
+    //    }
         return(
              <SafeAreaView style={styles.login}>
                     <AuthHeader />
@@ -174,7 +183,13 @@ class Login extends React.Component {
                             style={styles.loginBtn}
                             onPress={()=>this.handleLogin()}
                         >
-                            <Text style={styles.loginBtnTxt}>Login</Text>
+                            {/* <Text style={styles.loginBtnTxt}>Login</Text> */}
+                            <TextInput
+                                editable = {false}
+                                defaultValue = {'Login'}
+                                style={styles.loginBtnTxt}
+                                ref={component => this._loginBtnTextRef = component}
+                            />
                         </TouchableOpacity>
 
                         <TouchableOpacity 

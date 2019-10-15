@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 function You(props){
     let { MESSAGE_DATA } = props;
-
+    console.log('FROM YO MESG',MESSAGE_DATA.timeStamp)
     return(
         <View style={styles.msgView}>
             <View style={{
@@ -31,7 +31,7 @@ function You(props){
                 <Text style={{
                     color: '#5B5B5B',
                     fontSize: 10
-                    }}>{MESSAGE_DATA.time}</Text>
+                    }}>{MESSAGE_DATA.timeStamp}</Text>
                 {/* <Icon
                     name='done'
                     size={20}

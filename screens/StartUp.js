@@ -17,9 +17,11 @@ import { connect } from 'react-redux';
 // actions
 import  { GET_homeSliderImages, GET_newMoviesData } from '../store/actions/homeActions';
 import  { GET_allMoviesData } from '../store/actions/moviesAction';
+import { GET_AllSeries } from '../store/actions/seriesAction';
 
 import  { HANDLE_userLoggedIn } from '../store/actions/authAction'
 
+import { GET_UserProfileData } from '../store/actions/userProfileActions';
 
 import { BRAND_NAME } from '../constants/strings'
 
@@ -60,7 +62,10 @@ class StartUpScreen extends React.Component {
              GET_newMoviesData(dispatch)
 
              GET_allMoviesData(dispatch)
+            
+             GET_AllSeries(dispatch)
 
+             GET_UserProfileData(dispatch)
 
              setTimeout(()=>{
                  console.log('calling is set is loading func')

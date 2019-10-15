@@ -10,6 +10,23 @@ export function HANDLE_userLoggedIn(dispatch,payload){
     })
 }
 export function HANDLE_userLoggedOut(dispatch,payload){
+    let pyd = payload;
+    if(pyd===null){
+        pyd = {
+            isLoggedIn: false,
+            user: null,
+            error: {
+                type: null,
+                message: null
+            }
+        }
+    }
+    try{
+        
+        auth().signOut()
+    }catch(error){
+
+    }
     dispatch({
         type: USER_LOGGED_OUT,
         payload

@@ -10,23 +10,18 @@ import {
 
 
 function SearchedMovieItem(props){
-    // let FOUND_MOVIE = 
-    //     {
-    //         title: 'Hobbs & Shaw',
-    //         category: 'Action',
-    //         id: '1',
-    //         image:require('../../../assets/images/movies/1.png')
-    //     }
     
-    let  {FOUND_MOVIE}  = props
-    function handleShowMovieDetails(){
-        Alert.alert('open movie')
+    let  {FOUND_MOVIE, OPEN_MOVIE_DETAILS_MODAL_FUNCTION}  = props
+    function handleShowMovieDetails($OPEN_MOVIE_DETAILS_MODAL_FUNCTION){
+        $OPEN_MOVIE_DETAILS_MODAL_FUNCTION()
     }
     return(
-        <TouchableOpacity onPress={()=>handleShowMovieDetails()}>
+        <TouchableOpacity onPress={()=>OPEN_MOVIE_DETAILS_MODAL_FUNCTION(FOUND_MOVIE)}>
         <View style={styles.searchedMovieItem}>
             <Image 
-                source={FOUND_MOVIE.image}
+                source={{
+                    uri: FOUND_MOVIE.imageUrl
+                }}
                 style={styles.image}
             />
             <View>
@@ -44,20 +39,36 @@ function SearchedMovieItem(props){
                 <View>
                     <View style={{
                         display: 'flex',
-                        flexDirection:'row',
+                        flexDirection:'column',
                         paddingLeft: 10,
                         marginBottom: 5
                     }}>
-                        <Text style={{
-                            color: '#D0C9BF',
-                            fontFamily: 'RobotoSlab',
-                            fontSize: 10
-                        }}>Category:</Text>
-                        <Text style={{
-                            color: '#999999',
-                            fontSize: 10,
-                            marginLeft: 5
-                        }}>{FOUND_MOVIE.category}</Text>
+                        <View style={styles.detailsViewItem}>
+                            <Text style={{
+                                color: '#D0C9BF',
+                                fontFamily: 'RobotoSlab',
+                                fontSize: 10
+                            }}>Category:</Text>
+                            <Text style={{
+                                color: '#999999',
+                                fontSize: 10,
+                                marginLeft: 5
+                            }}>{FOUND_MOVIE.category}</Text>
+                        </View>
+                        <View style={styles.detailsViewItem}>
+                            <Text style={{
+                                color: '#D0C9BF',
+                                fontFamily: 'RobotoSlab',
+                                fontSize: 10
+                            }}>Type:</Text>
+                            <Text style={{
+                                color: '#999999',
+                                fontSize: 10,
+                                marginLeft: 5
+                            }}>{FOUND_MOVIE.type}</Text>
+                        </View>
+                        
+                        
                     </View>
                 </View>
             </View>
@@ -74,13 +85,17 @@ const styles = StyleSheet.create({
         borderColor: '#484545',
         borderWidth: 1,
         width: 139,
-        height: 144,
+        height: 150,
         marginHorizontal: 8,
         marginBottom: 10
     },
     image: {
         width: 139,
         height: 105
+    },
+    detailsViewItem: {
+        display: 'flex',
+        flexDirection:'row'
     }
 })
 

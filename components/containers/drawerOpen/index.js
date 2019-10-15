@@ -6,8 +6,11 @@ import {
      Image,
      TouchableOpacity,
      Alert,
-     Modal
+     Modal,
+     Button
     } from 'react-native'
+
+import { withNavigation } from 'react-navigation';
 
 import Icon from 'react-native-vector-icons/MaterialIcons'
 
@@ -30,6 +33,12 @@ class DrawerContentComponent extends React.Component {
         // Alert.alert('clicked')
         this.setModalVisible(!this.state.modalVisible);
         return 
+    }
+    closeContactModalAndNavigateToCart = ()=>{
+        console.log('clicked',this.props)
+        this.props.navigation.navigation.navigate('InboxPage')
+        this.setModalVisible(false);
+
     }
     displayNavItems = ($navigation)=>{
         let navItems = [
@@ -76,7 +85,7 @@ class DrawerContentComponent extends React.Component {
                         this.setModalVisible(!this.state.modalVisible);
                     }}>
                         <SafeAreaView style={{flex:1}}>
-                            <ContactUs />
+                            <ContactUs CLOSE_CONTACTUS_MODAL_FUNCTION_AND_NAVIGATE_TO_MESSAGE_US = {this.closeContactModalAndNavigateToCart}/>
                         </SafeAreaView>
                  </Modal>
                  
@@ -88,6 +97,7 @@ class DrawerContentComponent extends React.Component {
                                     key={index}
                                     style={styles.navItem}
                                     onPress={()=>handleNavigation(item.navigateToPathName)}
+                                   
                                     >
                                <Icon 
                                    name={item.icon}
@@ -132,14 +142,21 @@ class DrawerContentComponent extends React.Component {
     render(){
         console.log('FROM DRAWER COMPONENT=>',this.props)
         let { navigation } = this.props;
+        //onPress={()=>navigation.navigation.navigate('ProfilePage')}
         return(
             <View style={styles.drawerContentComponent}>
                 <View style={styles.header}>
-                    <View style={styles.userPicView}>
-                        <Image 
-                            source={require('../../../assets/images/user/user1.png')}
-                        />
-                    </View>
+                    {/* <View style={styles.userPicView}> */}
+                        <TouchableOpacity
+                        style={styles.userPicView}
+                            onPress={()=>navigation.navigation.navigate('ProfilePage')}
+                        >
+                            <Image 
+                                source={require('../../../assets/images/user/user1.png')}
+                            />
+                        </TouchableOpacity>
+                        
+                    {/* </View> */}
                 </View>
                 <View style={styles.body}>
                     <View style={styles.bodyTopContent}>
@@ -155,12 +172,10 @@ class DrawerContentComponent extends React.Component {
                                 color="#EEE2D0"
                             /> */}
                             <TouchableOpacity 
-                                onPress={()=>navigation.navigation.navigate('ProfilePage')}
-                                // style={{
-
-                                // }}
+                                // onPress={()=>navigation.navigation.navigate('PointsPage')}
+                                
                             >
-                                <Text style={styles.navText}>Profile</Text>
+                                <Text style={styles.navText}>Points</Text>
                             </TouchableOpacity>
                         </View>
                         <View>
@@ -269,4 +284,4 @@ const styles = StyleSheet.create({
 })
 
 
-export default DrawerContentComponent;
+export default withNavigation(DrawerContentComponent);

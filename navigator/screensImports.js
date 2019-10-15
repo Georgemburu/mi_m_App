@@ -8,7 +8,8 @@ import OpenInbox from '../screens/OpenInbox'
 import Points from '../screens/Points'
 import Profile from '../screens/Profile'
 import Search from '../screens/Search'
-
+import Login from '../screens/auth/Login'
+import SignUp from '../screens/auth/SignUp'
 
 
 const SCREENROUTES = {

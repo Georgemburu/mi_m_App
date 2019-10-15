@@ -25,25 +25,25 @@ class Inbox extends React.Component {
     state = {
         modalVisible: false,
         inboxes: [
-            {
-                to:'Mi Movies Admin',
-                image: require('../assets/images/user/user1.png'),
-                text: 'Lorem ipsum dolor sit amet, consectetur adipiscing sed',
-                status: 'read',
-                new: true
-            },
-            {
-                to:'Mi Movies Admin',
-                image: require('../assets/images/user/user1.png'),
-                text: 'Lorem ipsum dolor sit amet, consectetur adipiscing sed',
-                status: 'received'
-            },
-            {
-                to:'John Doe',
-                image: require('../assets/images/user/user1.png'),
-                text: 'Lorem ipsum dolor sit amet, consectetur adipiscing sed',
-                status: 'sent'
-            },
+            // {
+            //     to:'Mi Movies Admin',
+            //     image: require('../assets/images/user/user1.png'),
+            //     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing sed',
+            //     status: 'read',
+            //     new: true
+            // },
+            // {
+            //     to:'Mi Movies Admin',
+            //     image: require('../assets/images/user/user1.png'),
+            //     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing sed',
+            //     status: 'received'
+            // },
+            // {
+            //     to:'John Doe',
+            //     image: require('../assets/images/user/user1.png'),
+            //     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing sed',
+            //     status: 'sent'
+            // },
         ]
     }
 
@@ -55,7 +55,30 @@ class Inbox extends React.Component {
     renderInboxes = ($inboxes)=>{
         return(
             <Fragment>
-                {$inboxes.map((data,index)=>{
+                {$inboxes.length<1?(
+                    <View>
+                        <Text style={{
+                            color: 'grey'
+                        }}>No Chats </Text>
+                        <TouchableOpacity 
+                            style={{
+                                marginTop: 10
+                            }}
+                            onPress = {()=>this.handleOpenMessage()}
+                        >
+                            <Text style={{
+                                color: 'white',
+                                borderBottomColor: 'gray',
+                                borderBottomWidth: 1
+                            }}>
+                                Chat with Mi Movies
+                            </Text>
+                        </TouchableOpacity>
+                        
+                    </View>
+                
+                
+                ):($inboxes.map((data,index)=>{
                     return(
                         <TouchableOpacity 
                             onPress={()=>this.handleOpenMessage()}
@@ -120,7 +143,7 @@ class Inbox extends React.Component {
                             </View>
                         </TouchableOpacity>
                     )
-                })}
+                }))}
             </Fragment>
         )
     }
@@ -144,7 +167,6 @@ class Inbox extends React.Component {
                     transparent={false}
                     visible={this.state.modalVisible}
                     onRequestClose={() => {
-                        Alert.alert('Modal has been closed.');
                         this.setModalVisible(false);
                     }}>
                         <OpenInbox  />

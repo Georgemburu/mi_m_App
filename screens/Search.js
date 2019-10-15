@@ -8,12 +8,18 @@ import {
     TouchableOpacity,
     ScrollView,
     Dimensions,
-    FlatList
+    FlatList,
+    Modal
 } from 'react-native'
 
-import Icon from 'react-native-vector-icons/MaterialIcons'
-import MainHeader from '../components/dumb/headers/main'
-import SearchedMovieItem from '../components/dumb/searchedMovieItem'
+// store
+import { connect } from 'react-redux';
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import MovieDetails from './MovieDetails';
+import MainHeader from '../components/dumb/headers/main';
+import SearchedMovieItem from '../components/dumb/searchedMovieItem';
  
 const WIDTH = Dimensions.get('window').width;
 const HEIGHT = Dimensions.get('window').height;
@@ -25,62 +31,123 @@ class Search extends React.Component {
         color: '#EEE2D0'
     }
     state = {
-        
+        _ClikedMovie_Data : {},
+        modalVisible: false,
+        searchText:'',
         foundMovies:[
-            {
-                title: 'Hobbs & Shaw',
-                category: 'Action',
-                id: '1',
-                image:require('../assets/images/movies/1.png')
-            },
-            {
-                title: 'Hobbs & Shaw',
-                category: 'Action',
-                id: '2',
-                image:require('../assets/images/movies/1.png')
-            },
-            {
-                title: 'Hobbs & Shaw',
-                category: 'Action',
-                id: '3',
-                image:require('../assets/images/movies/1.png')
-            },
-            {
-                title: 'Hobbs & Shaw',
-                category: 'Action',
-                id: '4',
-                image:require('../assets/images/movies/1.png')
-            },
-            {
-                title: 'Hobbs & Shaw',
-                category: 'Action',
-                id: '5',
-                image:require('../assets/images/movies/1.png')
-            },
-            {
-                title: 'Hobbs & Shaw',
-                category: 'Action',
-                id: '6',
-                image:require('../assets/images/movies/1.png')
-            },
-            {
-                title: 'Hobbs & Shaw',
-                category: 'Action',
-                id: '7',
-                image:require('../assets/images/movies/1.png')
-            },
-            {
-                title: 'Hobbs & Shaw',
-                category: 'Action',
-                id: '8',
-                image:require('../assets/images/movies/1.png')
-            },
+            // {
+            //     title: 'Hobbs & Shaw',
+            //     category: 'Action',
+            //     id: '1',
+            //     image:require('../assets/images/movies/1.png')
+            // },
+            // {
+            //     title: 'Hobbs & Shaw',
+            //     category: 'Action',
+            //     id: '2',
+            //     image:require('../assets/images/movies/1.png')
+            // },
+            // {
+            //     title: 'Hobbs & Shaw',
+            //     category: 'Action',
+            //     id: '3',
+            //     image:require('../assets/images/movies/1.png')
+            // },
+            // {
+            //     title: 'Hobbs & Shaw',
+            //     category: 'Action',
+            //     id: '4',
+            //     image:require('../assets/images/movies/1.png')
+            // },
+            // {
+            //     title: 'Hobbs & Shaw',
+            //     category: 'Action',
+            //     id: '5',
+            //     image:require('../assets/images/movies/1.png')
+            // },
+            // {
+            //     title: 'Hobbs & Shaw',
+            //     category: 'Action',
+            //     id: '6',
+            //     image:require('../assets/images/movies/1.png')
+            // },
+            // {
+            //     title: 'Hobbs & Shaw',
+            //     category: 'Action',
+            //     id: '7',
+            //     image:require('../assets/images/movies/1.png')
+            // },
+            // {
+            //     title: 'Hobbs & Shaw',
+            //     category: 'Action',
+            //     id: '8',
+            //     image:require('../assets/images/movies/1.png')
+            // },
         ]
     }
+    
+    setModalVisible($clickedmovieData=null,visible) {
+        // Alert.alert(visible)
+        this.setState({
+            ...this.state,
+            modalVisible: visible,
+            _ClikedMovie_Data: $clickedmovieData?$clickedmovieData:{}
+        });
+    }
+    handleChangeSearchTextInput = ($text)=>{
+        this.setState({
+            ...this.state,
+            searchText: $text
+        })
+    }
+    handleSearchBtnClick = ($moviesArr,$searchText)=>{
+        // if(!$searchText|| $searchText==='' || $searchText===' '){
+        //     return
+        // }
+        let lowercaseSearchText = $searchText.toLowerCase()
+        console.log('Search button clicked')
+        console.log('searching for movie containing',$searchText)
+        // loop to find movie
+        let matchingMovies = []
+        $moviesArr.forEach((mov)=>{
+            if(mov.title.toLowerCase().includes(lowercaseSearchText)===true){
+                matchingMovies.push(mov)
+            }
+        })
+        this.setState({
+            ...this.state,
+            foundMovies: [...matchingMovies]
+        })
+        
+    }
+    openMovieDetailsModal = ($ClickedmovieData)=>{
+        console.log('CLICKED TO OPEN MODAl')
+        // this._ClikedMovie_Data = $ClickedmovieData;
+        this.setModalVisible($ClickedmovieData,true)
+    }
+    navigateToCart = ()=>{
+        // close modal then navigate
+        this.setState({
+            ...this.state,
+            modalVisible: false
+        })
+        this.props.navigation.navigate('CartPage')
+    }
     render(){
-        let {foundMovies} = this.state
+        let {foundMovies, searchText} = this.state
+        let { allMovies } = this.props;
+        console.log('ALL MOVIES',allMovies)
         return (
            <SafeAreaView style={{flex:1}}>
+               <Modal
+                    animationType="slide"
+                    transparent={false}
+                    visible={this.state.modalVisible}
+                    onRequestClose={() => {
+                        this.setModalVisible(false);
+                    }}>
+                        <MovieDetails  MOVIE_DATA={this.state._ClikedMovie_Data} NAVIGATE_TO_CART_FUNCTION={this.navigateToCart}/>
+                </Modal>
             <View style={styles.search}>
                 <MainHeader TITLE={this.Title} />
                 <View style={styles.searchBody}>
@@ -90,8 +157,12 @@ class Search extends React.Component {
                             placeholder = 'Type Movie Title To Search'
                             placeholderTextColor = '#6C6B69'
                             style={styles.searchTextInput}
+                            defaultValue = {searchText}
+                            onChangeText = {text => this.handleChangeSearchTextInput(text)}
                         />
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                            onPress = {()=>this.handleSearchBtnClick(allMovies,searchText)}
+                        >
                             <Text style={{
                                 color: '#F9AA33',
                                 fontFamily: 'RobotoSlab',
@@ -115,7 +186,7 @@ class Search extends React.Component {
                                
                                 <FlatList horizontal
                                     data={foundMovies}
-                                    renderItem={({ item }) => <SearchedMovieItem FOUND_MOVIE = {item} />}
+                                    renderItem={({ item }) => <SearchedMovieItem FOUND_MOVIE = {item} OPEN_MOVIE_DETAILS_MODAL_FUNCTION={this.openMovieDetailsModal}/>}
                                     keyExtractor={item => item.id}
                                 />
                         </View>
@@ -179,4 +250,16 @@ const styles = StyleSheet.create({
     }
 })
 
-export default Search;
+function mapStateToProps(state){
+    console.log('SEARCH PAGE mapping state to props',state);
+    return {
+        allMovies:[...state.moviesReducer.movies,...state.seriesReducer.series]
+    }
+}
+function mapDispatchToProps(dispatch){
+    return {
+        dispatch: dispatch
+    }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(Search);
